@@ -144,7 +144,8 @@ def main():
     np.set_printoptions(suppress=True)
 
     competition = Competition("ai_implementations", wordlist_filename="data/official/combined_wordlist.txt", hard_mode=False)
-    competition.fight(rounds=1000, solution_wordlist_filename="data/official/shuffled_real_wordles.txt", print_details=False)
+    # competition.fight(rounds=1000, solution_wordlist_filename="data/official/shuffled_real_wordles.txt", print_details=False)
+    competition.fight(rounds=3, solution_wordlist_filename="data/official/shuffled_real_wordles.txt", print_details=True)
 
 if __name__ == "__main__":
     main()
