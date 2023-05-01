@@ -1,5 +1,7 @@
 # CSCI4511W Spring 2023 Final Project
 
+[Link to our final writeup on Overleaf!](https://blogs.motiondevelopment.top/overleaf)
+
 ## Contributors
 
 - Jerome Schreiber
