@@ -105,10 +105,14 @@ class Competition:
                       "time", current_time, "/", current_time * rounds / (r + 1), end='')
                 competitor_start = time.time()
                 successes, round_guesses = self.play(competitor, words)
-                round_points = len(round_guesses) if success else 15
+                round_points = len(round_guesses) if all(successes) else 15
                 result[competitor] += round_points
                 guesses[competitor].append(round_guesses)
                 points[competitor].append(round_points)
+                # for completion in successes: # this probs will be used when the partial win metric is created
+                #     if completion: success_total[competitor] += 1
+                # TODO: create a partial win metric that tracks the number of Wordle boards the AIs complete,
+                #       make it separate from the Quordle win tracker. Then add to print statements & table creation
                 if all(successes):
                     success_total[competitor] += 1
                 competitor_times[c] += time.time() - competitor_start
@@ -143,7 +147,7 @@ class Competition:
             placement += 1
         writer.write_table()
 
-# TODO: change this for Quordle
+# optional TODO: remove this feature cuz Quordle doesn't have a hard mode 
 def is_hard_mode(word, guess_history):
     """
     Returns True if the word is a legal guess in hard mode.
