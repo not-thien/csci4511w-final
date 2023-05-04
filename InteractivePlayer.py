@@ -17,7 +17,7 @@ ccccc
 
 Assign your AI to the ai variable.
 List already done guesses in the guesses variable.
-
+ 
 """
 
 def to_enum(char):
