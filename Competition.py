@@ -52,7 +52,7 @@ class Competition:
                 print("Competition aborted.")
                 quit()
 
-            # Update the AI's progress (guess_history) through all 4 boards in the Quordle game for the guess it just made
+            # Update the AI's progress (guess_history) through all 4 boards in the Quordle game for the guess it just made 
             guess_result_all = []
             for board in range(4): # get the result for each board
                 if not successes[board]: # but only if the board hasn't been solved yet
