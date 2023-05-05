@@ -34,81 +34,28 @@ class PriorityHashQueue:
 
     def enqueue(self, word, match_value):
         if (self.returnLength() == 0):
-            self.queue.append(HashMap(word, match_value))
+            self.queue.append((word, match_value))
         else:
-            newEntry = HashMap(word, match_value)
+            newEntry = (word, match_value)
             for i in range(self.returnLength()):
                 if (i == self.returnLength() - 1 or match_value == 0):
                     self.queue.append(newEntry)
                     break
-                elif (match_value > self.queue[i].get_match_value()):
+                elif (match_value > self.queue[i][1]): # gets match_value
                     self.queue.insert(i, newEntry)
                     break
 
     def dequeue(self, index):
         return self.queue.pop(index)
 
-
-
 ################################################################
-
-
-
-# This filter uses list of banned letters to eliminate words from the candidate list (word_list)
-def filterWordsBannedLetters(word_list, banned_letters, baseline_answers, misplaced_letters):
-    wordHashList = PriorityHashQueue()
-    try:
-        for i in range(word_list.returnLength()):
-            word = word_list.dequeue(0).get_word()
-            isBanned = False
-            matching_letters = 0  # Contains the number of misplaced letters in the word
-            for letter in banned_letters:
-                if letter in word:
-                    isBanned = True
-                    break
-            if not isBanned:
-                index = 0
-                for letter in misplaced_letters:
-                    if letter == baseline_answers[index]:
-                        matching_letters += 6
-                    elif letter in word:
-                        matching_letters += 1
-                    index += 1
-                wordHashList.enqueue(word, matching_letters)
-    except Exception as e:
-        print(repr(e))
-    return wordHashList
-
-
-# This filter uses regex to eliminate words from the candidate list (word_list)
-def filterWordsRegex(word_list, baseline_answers, misplaced_letters):
-    wordHashList = PriorityHashQueue()
-    try:
-        for i in range(word_list.returnLength()):
-            word = word_list.dequeue(0).get_word()
-            isBanned = False
-            matching_letters = 0  # Contains the number of misplaced letters in the word
-            if not re.match("".join(baseline_answers), word):
-                isBanned = True
-            if not isBanned:
-                index = 0
-                for letter in misplaced_letters:
-                    if letter == baseline_answers[index]:
-                        matching_letters += 6
-                    elif letter in word:
-                        matching_letters += 1
-                    index += 1
-                wordHashList.enqueue(word, matching_letters)
-    except Exception as e:
-        print(repr(e))
-    return wordHashList
 
 # This filter uses regex and list of banned letters to eliminate words from the candidate list (word_list)
 def filterWordsBannedLettersRegex(word_list, banned_letters, baseline_answers, misplaced_letters):
     wordHashList = PriorityHashQueue()
     try:
         for i in range(word_list.returnLength()):
-            word = word_list.dequeue(0).get_word()
+            word = word_list.dequeue(0)[0]
             isBanned = False
             matching_letters = 0  # Contains the number of misplaced letters in the word
             for letter in banned_letters:
@@ -130,7 +77,7 @@ def filterWordsBannedLettersRegex(word_list, banned_letters, baseline_answers, m
         print(repr(e))
     return wordHashList
 
-# This function takes a list of words and returns a list of words that contain at least one uppercase letter
+# This function checks if a word has upper-case letters
 def hasUpperCase(word):
     for i in word:
         if i.isupper():

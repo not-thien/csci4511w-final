@@ -95,8 +95,9 @@ class Competition:
         competitor_times = np.zeros(len(self.competitors))
         for r in range(rounds):
             words = []
+            # setup the quordle words the bots are trying to guess
             for word in range(4):
-                words[word] = random.choice(fight_words) if shuffle else fight_words[r]
+                words.append(random.choice(fight_words))
             current_time = time.time() - start
             round_words.append(words)
             c = 0
@@ -159,7 +160,7 @@ def main():
     np.set_printoptions(threshold=np.inf)
     np.set_printoptions(suppress=True)
 
-    competition = Competition("ai_implementations", wordlist_filename="data/official/combined_wordlist.txt", hard_mode=False)
+    competition = Competition("quordle_ai", wordlist_filename="data/official/combined_wordlist.txt", hard_mode=False)
     # competition.fight(rounds=1000, solution_wordlist_filename="data/official/shuffled_real_wordles.txt", print_details=False)
     competition.fight(rounds=3, solution_wordlist_filename="data/official/shuffled_real_wordles.txt", print_details=True)
 
