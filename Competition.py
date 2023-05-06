@@ -94,6 +94,7 @@ class Competition:
         for r in range(rounds):
             words = []
             for i in range(4):
+            # setup the quordle words the bots are trying to guess
                 words.append(random.choice(fight_words))
             current_time = time.time() - start
             round_words.append(words)
