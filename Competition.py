@@ -10,17 +10,15 @@ from pytablewriter.style import Style
 
 from WordList import *
 from WordleAI import *
-from ai_implementations import LetterPopularityAI
 
 
 class Competition:
 
-    def __init__(self, competitor_directory, wordlist_filename="data/official/combined_wordlist.txt", hard_mode=False):
+    def __init__(self, competitor_directory, wordlist_filename="data/official/combined_wordlist.txt"):
         self.competitor_directory = competitor_directory
         self.wordlist = WordList(wordlist_filename)
         self.words = self.wordlist.get_list_copy()
         self.competitors = self.load_competitors()
-        self.hard_mode = hard_mode
 
     def load_competitors(self):
         competitors = []
@@ -33,9 +31,9 @@ class Competition:
 
         return competitors
 
-    def guess_is_legal(self, guess, guess_history):
-        return len(guess) == 5 and guess.lower() == guess and guess in self.words and (
-                not self.hard_mode or is_hard_mode(guess, guess_history))
+    def guess_is_legal(self, guess):
+        print("\nGUESS:" + str(guess))
+        return len(guess) == 5 and guess.lower() == guess and guess in self.words
 
     def play(self, competitor, words):
         guesses = []                             # will become a list of up to 9 words
@@ -46,28 +44,28 @@ class Competition:
         for i in range(9):  # Up to 9 guesses in Quordle 
             # The AI makes a guess, and we check if it's legal
             guess = competitor.guess(guess_history)
-            if not self.guess_is_legal(guess, guess_history):
+            if not self.guess_is_legal(guess):
                 print("Competitor ", competitor.__class__.__name__, " is a dirty cheater!")
-                print("hard_mode: ", self.hard_mode, "guess: ", guess, "guess_history", guess_history)
+                print("guess: ", guess, "guess_history", guess_history)
                 print("Competition aborted.")
                 quit()
 
             # Update the AI's progress (guess_history) through all 4 boards in the Quordle game for the guess it just made 
             guess_result_all = []
             for board in range(4): # get the result for each board
-                if not successes[board]: # but only if the board hasn't been solved yet
-                    guess_result_per_board = [] # a list of 5 LetterInformation objects
-                    for c in range(5): # check each character in the 5-letter guess
-                        if guess[c] not in words[board]:
-                            guess_result_per_board.append(LetterInformation.NOT_PRESENT)
-                        elif words[board][c] == guess[c]:
-                            guess_result_per_board.append(LetterInformation.CORRECT)
-                        else:
-                            guess_result_per_board.append(LetterInformation.PRESENT)
-                    guess_result_all.append((board, guess, guess_result_per_board))
+                # if not successes[board]: # but only if the board hasn't been solved yet
+                guess_result_per_board = [] # a list of 5 LetterInformation objects
+                for c in range(5): # check each character in the 5-letter guess
+                    if guess[c] not in words[board]:
+                        guess_result_per_board.append(LetterInformation.NOT_PRESENT)
+                    elif words[board][c] == guess[c]:
+                        guess_result_per_board.append(LetterInformation.CORRECT)
+                    else:
+                        guess_result_per_board.append(LetterInformation.PRESENT)
+                guess_result_all.append((board, guess, guess_result_per_board))
 
-                    if guess == words[board]:
-                        successes[board] = True
+                if guess == words[board]:
+                    successes[board] = True
                     
             # Update guess_history for the AI's guess
             guess_history.append(guess_result_all)
@@ -95,8 +93,8 @@ class Competition:
         competitor_times = np.zeros(len(self.competitors))
         for r in range(rounds):
             words = []
-            for word in range(4):
-                words[word] = random.choice(fight_words) if shuffle else fight_words[r]
+            for i in range(4):
+                words.append(random.choice(fight_words))
             current_time = time.time() - start
             round_words.append(words)
             c = 0
@@ -129,7 +127,7 @@ class Competition:
             print("Points per round: ", points)
             print("")
 
-        print("Competition finished with ", rounds, " rounds, ", len(self.competitors), " competitors and hard_mode = ", self.hard_mode,"\n")
+        print("Competition finished with ", rounds, " rounds, ", len(self.competitors), " competitors\n")
         result = dict(sorted(result.items(), key=lambda item: item[1]))
 
         writer = pytablewriter.MarkdownTableWriter()
@@ -147,21 +145,13 @@ class Competition:
             placement += 1
         writer.write_table()
 
-# optional TODO: remove this feature cuz Quordle doesn't have a hard mode 
-def is_hard_mode(word, guess_history):
-    """
-    Returns True if the word is a legal guess in hard mode.
-    """
-    return len(LetterPopularityAI.remaining_options([word], guess_history)) == 1
-
-
 def main():
     np.set_printoptions(threshold=np.inf)
     np.set_printoptions(suppress=True)
 
-    competition = Competition("ai_implementations", wordlist_filename="data/official/combined_wordlist.txt", hard_mode=False)
+    competition = Competition("ai_implementations", wordlist_filename="data/official/combined_wordlist.txt")
     # competition.fight(rounds=1000, solution_wordlist_filename="data/official/shuffled_real_wordles.txt", print_details=False)
-    competition.fight(rounds=3, solution_wordlist_filename="data/official/shuffled_real_wordles.txt", print_details=True)
+    competition.fight(rounds=30, solution_wordlist_filename="data/official/shuffled_real_wordles.txt", print_details=True)
 
 if __name__ == "__main__":
     main()
