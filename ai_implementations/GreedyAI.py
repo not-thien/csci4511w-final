@@ -1,5 +1,11 @@
-import random 
+"""
+Created on Friday May 5 9:30pm CST
 
+@author: Thien Nguyen
+"""
+from WordleAI import WordleAI, LetterInformation
+from WordleJudge import WordleJudge
+###################### Letter Tree ##########################
 class Node:
     #Construction
     def __init__(self, parent=None):
@@ -32,23 +38,10 @@ class Node:
         self.total_successors += 1
         word = word[1:]
         next_val = word[0]
-
         if next_val not in self.children:
             self.children[next_val] = Node(self)
 
         self.children[next_val].add(word, final_word)
-
-
-    def remove(self, successors=None):
-        #Hard Delete Case: Actually Delete the Node Instead of Simply Update the Total Number of Scuccessors UpStream
-        if successors is None:
-            self.parent.children.pop(self.value, None)
-            successors = self.total_successors
-
-        self.total_successors -= successors
-
-        if self.parent is not None:
-            self.parent.remove(successors)
 
 class NodeCollection:
     def __init__(self):
@@ -56,92 +49,15 @@ class NodeCollection:
         self.LockedLetters = [None, None, None, None, None, None]
     
     # load all words
-    def AddDictionary(self, path):
-        with open(path, 'r') as file:
-            for line in file:
-                line = line.strip()
-                if len(line) == 5:
-                    line = "#" + line.lower()
-                    self.Root.add(line)
-    
-    #Green Letter Sceanrio. Delete all of the letters at a certain level\slot which are not the specified value.
-    def LockLetter(self, level, value):
-        self.LockedLetters[level] = value
-        self._LockLetter(level, value, self.Root)
-    
-    def _LockLetter(self, level, value, search):
-        if search == None:
-            return
-        #Go Deeper if we are not on the right level
-        if search.level < level:
-            for node_key in list(search.children.keys()):
-                node = search.children[node_key]
-                self._LockLetter(level, value, node)
-        #If we are at the desired level, remove any nodes which are not the letter
-        if search.level == level and search.value != value:
-            search.remove()
-    
-    #Grey Letter Scenario. Remove all instances of a letter from the tree
-    def RemoveLetter(self, value):
-        self._RemoveLetter(value, self.Root)
-    
-    def _RemoveLetter(self, value, search):
-        #Base Case. No expansion needed if searcb  node is null
-        if search == None:
-            return
-        #Base Case. If the search node is the value we are looking for, delete it and as a result all of it's successors
-        if search.value == value and self.isNotLocked(search):
-            search.remove()
-            return
-        #Expand each of the children looking for the value of interest
-        for node_key in list(search.children.keys()):
-            node = search.children[node_key]
-            self._RemoveLetter(value, node)
+    def AddDictionary(self, words):
+        for word in words:
+            self.Root.add('#' + word)
 
-    def FloatLetter(self, levels, value):
-        for level in levels:
-            self.RemoveLetterAtLevel(level, value, self.Root)
-        self.MustHaveLetter(value, len(levels), self.Root, 0)
-
-    def MustHaveLetter(self, value, occurrences, search, found):
-        if search is None:
-            return
-        
-        if search.value == value and self.isNotLocked(search):
-            found += 1
-        
-        if found >= occurrences:
-            return
-        
-        if search.level == 5 and found < occurrences:
-            search.remove()
-            return
-        
-        for node_key in list(search.children.keys()):
-            node = search.children[node_key]
-            self.MustHaveLetter(value, occurrences, node, found)
-    
-    def RemoveLetterAtLevel(self, level, value, search):
-        if search is None:
-            return
-        
-        if search.level > level:
-            return
-        
-        if search.level + 1 == level and value in search.children and search.children[value] is not None and self.isNotLocked(search.children[value]):
-            search.children[value].remove()
-            return
-        
-        if search.level + 1 < level:
-            for node in search.children.values():
-                self.RemoveLetterAtLevel(level, value, node)
-    
-    def isNotLocked(self, node):
-        return self.LockedLetters[node.level] != node.value
-
+    # Start the recursion
     def MostLikely(self):
         return self._MostLikely(self.Root)
 
+    # searches through each letter and chooses the letter with most successors
     def _MostLikely(self, search):
         maxSuccessors = float('-inf')
         maxNode = None
@@ -158,36 +74,145 @@ class NodeCollection:
         else:
             return self._MostLikely(maxNode)
 
-    def RandomSearch(self):
-        search = Root
-        r = random.Random()
+###################### Letter Tree Done #####################
 
-        while search.level < 5:
-            children = list(search.children.values())
-            index = r.randrange(len(children))
+class GreedyPopularAI(WordleAI):
+    '''
+    This AI uses greedy best-first search with a heuristic of letter frequency
+    '''
+    def __init__(self, words):
+        super().__init__(words)
+        self.initial_corpus = words
+        self.corpus = [words.copy() for _ in range(4)]
+        self.judge = WordleJudge()
+        self.solved = [False, False, False, False]
+        self.board_trees = [NodeCollection() for i in range(4)]
+        for bt in self.board_trees:
+            bt.AddDictionary(words)
+    
+    def get_author(self):
+        """
+        Returns the name of the author
+        """
+        return "Thien Nguyen"
 
-            if children[index] is not None and children[index].total_successors > 0:
-                search = children[index]
+    def guess(self, guess_history):
+        """
+        Returns a 5 letter word trying to guess the wordle after filtering the word pools
 
-        return search.word
+        Parameters
+        ----------
+        guess_history : list of lists of tuples (board, guess, result)
+            A list of lists of tuples (board, word, result) with result consisting of LetterInformation for each letter on their
+            position specifically, for example one previous guess with the guess 'steer' for the word 'tiger':
+            [(0, 'steer',[LetterInformation.NOT_PRESENT, LetterInformation.PRESENT,
+            LetterInformation.PRESENT, LetterInformation.CORRECT, LetterInformation.CORRECT])]
+        """
 
-def main():
-    nc = NodeCollection()
-    nc.AddDictionary("data\official\shuffled_real_wordles.txt")
-    nc.RemoveLetter('s')
-    nc.RemoveLetter('t')
-    nc.RemoveLetter('i')
-    nc.RemoveLetter('d')
-    nc.FloatLetter([2], 'a')
-    nc.LockLetter(1, 'a')
-    nc.RemoveLetter('l')
-    nc.RemoveLetter('o')
-    nc.RemoveLetter('y')
-    nc.RemoveLetter('m')
-    nc.RemoveLetter('a') # works cuz it checks if letter is confirmed or not before removal
-    nc.RemoveLetter('z')
-    nc.FloatLetter([5], 'e')
-    print(nc.MostLikely())
+        if(len(guess_history) == 0):
+            self.solved = [False for _ in range(4)]
+            return 'stond' # greedy BFS with this heuristic always starts with 'stond'
+        word_pools = [pool.copy() for pool in self.corpus]
+        word_pools = self.filter_pools(word_pools, guess_history)
+        next_guess = self.gbfs(word_pools, guess_history)
+        if next_guess[0] != '#': # needed by tree implementation, special case
+            return next_guess
+        return next_guess[1:]
 
-if __name__ == "__main__":
-    main()
+    def gbfs(self, word_pools, guess_history):
+        """
+        Resets trees per board and generates guess for next board to be solved
+
+        Parameters
+        ----------
+        guess_history : list of lists of tuples (board, guess, result)
+            A list of lists of tuples (board, word, result) with result consisting of LetterInformation for each letter on their
+            position specifically, for example one previous guess with the guess 'steer' for the word 'tiger':
+            [(0, 'steer',[LetterInformation.NOT_PRESENT, LetterInformation.PRESENT,
+            LetterInformation.PRESENT, LetterInformation.CORRECT, LetterInformation.CORRECT])]
+
+        word_pools: list of strings
+            Each string is an accepted Wordle guess
+        """
+        self.board_trees = [NodeCollection() for i in range(4)]
+        for i,word_pool in enumerate(word_pools):
+            if not self.solved[i]:
+                if len(word_pool) > 1: # build tree based on current word pool for the respective board & generate guess
+                    self.board_trees[i].AddDictionary(word_pool)
+                    return self.board_trees[i].MostLikely()
+                elif len(word_pool) == 1 and not self.has_guessed(word_pool[0], guess_history): # special case where only 1 word left in pool
+                    self.solved[i] = True
+                    return word_pool[0]
+                else: # otherwise, already solved the board
+                    self.solved[i] = True
+        return "XXXXX"
+
+    def has_guessed(self, guess, guess_history):
+        # Checks if guess has already been made
+        for r in guess_history:
+            for c in r:
+                if c[1] == guess:
+                    return True
+        return False
+
+    def filter_pools(self, word_pools, guess_history):
+        """
+        Updates each board's word pool based on guess_history
+
+        Parameters
+        ----------
+        guess_history : list of lists of tuples (board, guess, result)
+            A list of lists of tuples (board, word, result) with result consisting of LetterInformation for each letter on their
+            position specifically, for example one previous guess with the guess 'steer' for the word 'tiger':
+            [(0, 'steer',[LetterInformation.NOT_PRESENT, LetterInformation.PRESENT,
+            LetterInformation.PRESENT, LetterInformation.CORRECT, LetterInformation.CORRECT])]
+            
+        word_pools: list of strings
+            Each string is an accepted Wordle guess
+        """
+        for index, word_pool in enumerate(word_pools):
+            for round in guess_history:
+                board = round[index]
+                present_letters = []
+                forbidden_positions = []
+                forbidden_letters= []
+                correct_positions = []
+                for i in range(5):
+                    if board[2][i] == LetterInformation.PRESENT:
+                        present_letters.append(board[1][i])
+                        forbidden_positions.append((board[1][i], i))
+                    elif board[2][i] == LetterInformation.NOT_PRESENT:
+                        forbidden_letters.append(board[1][i])
+                    elif board[2][i] == LetterInformation.CORRECT:
+                        correct_positions.append((board[1][i], i))
+                # The following 4 fxns were pulled from BruugleAI and are purely used for filtering a word pool
+                word_pool = include(word_pool, present_letters)
+                word_pool = exclude(word_pool, forbidden_letters)
+                word_pool = include_positions(word_pool, correct_positions)
+                word_pool = exclude_positions(word_pool, forbidden_positions)
+            word_pools[index] = word_pool
+        return word_pools
+
+def include(word_list, values):
+    filtered_word_list = word_list
+    for value in values:
+        filtered_word_list = [word for word in filtered_word_list if value in word]
+    return filtered_word_list
+
+def exclude(word_list, values):
+    filtered_word_list = word_list
+    for value in values:
+        filtered_word_list = [word for word in filtered_word_list if not value in word]
+    return filtered_word_list
+
+def include_positions(word_list, values):
+    filtered_word_list = word_list
+    for value in values:
+        filtered_word_list = [word for word in filtered_word_list if value[0] == word[value[1]]]
+    return filtered_word_list
+
+def exclude_positions(word_list, values):
+    filtered_word_list = word_list
+    for value in values:
+        filtered_word_list = [word for word in filtered_word_list if not value[0] == word[value[1]]]
+    return filtered_word_list
