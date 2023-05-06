@@ -12,18 +12,21 @@ class EntropyAI(WordleAI):
 
     def guess(self, guess_history):
         candidates = self.words
-        for (guess, outcome) in guess_history:
-            for i, x in enumerate(outcome):
-                if x == LetterInformation.CORRECT:
-                    candidates = [x for x in candidates if x[i] == guess[i]]
-                elif x == LetterInformation.PRESENT:
-                    candidates = [x for x in candidates if x[i] != guess[i] and guess[i] in x]
-                else:
-                    candidates = [x for x in candidates if guess[i] not in x]
+        for (guess, outcome_list) in guess_history:
+            for board_num, outcome in enumerate(outcome_list):
+                for i, x in enumerate(outcome):
+                    if x == LetterInformation.CORRECT:
+                        candidates = [word for word in candidates if word[board_num][i] == guess[i]]
+                    elif x == LetterInformation.PRESENT:
+                        candidates = [word for word in candidates if word[board_num][i] != guess[i] and guess[i] in word[board_num]]
+                    else:
+                        candidates = [word for word in candidates if guess[i] not in word[board_num]]
         return self.cached_get_candidate(candidates, self.words, guess_history)
 
+    
+
     def get_author(self):
-        return "Akshaylive"
+        return "Vuong Dovu"
 
     """
     This function provides three probability values:
