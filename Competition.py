@@ -79,6 +79,7 @@ class Competition:
         print("Start tournament")
         result = {}
         success_total = {}
+        partial_solves = {}
         guesses = {}
         points = {}
         round_words = []
@@ -86,6 +87,7 @@ class Competition:
         for competitor in self.competitors:
             result[competitor] = 0
             success_total[competitor] = 0
+            partial_solves[competitor] = 0            
             guesses[competitor] = []
             points[competitor] = []
         fight_words = WordList(solution_wordlist_filename).get_list_copy()
@@ -108,10 +110,8 @@ class Competition:
                 result[competitor] += round_points
                 guesses[competitor].append(round_guesses)
                 points[competitor].append(round_points)
-                # for completion in successes: # this probs will be used when the partial win metric is created
-                #     if completion: success_total[competitor] += 1
-                # TODO: create a partial win metric that tracks the number of Wordle boards the AIs complete,
-                #       make it separate from the Quordle win tracker. Then add to print statements & table creation
+                for solve in successes: # track partial wins
+                    if solve: partial_solves[competitor] += 1
                 if all(successes):
                     success_total[competitor] += 1
                 competitor_times[c] += time.time() - competitor_start
@@ -133,7 +133,7 @@ class Competition:
 
         writer = pytablewriter.MarkdownTableWriter()
         writer.table_name = "Leaderboard"
-        writer.headers = ["Nr", "AI", "Author", "Points per round", "Success rate"]
+        writer.headers = ["Nr", "AI", "Author", "Points per round", "Success rate", "Individual Boards Solved", "Avg Boards Solved Per Round"]
         for i in range(len(writer.headers)):
             writer.set_style(column=i, style=Style(align="left"))
         writer.value_matrix = []
@@ -142,7 +142,7 @@ class Competition:
         for competitor in result:
             writer.value_matrix.append(
                 [placement, competitor.__class__.__name__, competitor.get_author(), result[competitor] / rounds,
-                 str(100 * success_total[competitor] / rounds) + "%"])
+                 str(100 * success_total[competitor] / rounds) + "%", str(partial_solves[competitor]), str(partial_solves[competitor] / rounds)])
             placement += 1
         writer.write_table()
 
