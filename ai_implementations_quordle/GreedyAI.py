@@ -108,10 +108,11 @@ class GreedyPopularAI(WordleAI):
             [(0, 'steer',[LetterInformation.NOT_PRESENT, LetterInformation.PRESENT,
             LetterInformation.PRESENT, LetterInformation.CORRECT, LetterInformation.CORRECT])]
         """
-
-        if(len(guess_history) == 0):
+        
+        if len(guess_history) == 0:
             self.solved = [False for _ in range(4)]
-            return 'stond' # greedy BFS with this heuristic always starts with 'stond'
+            return "stond"
+
         word_pools = [pool.copy() for pool in self.corpus]
         word_pools = self.filter_pools(word_pools, guess_history)
         next_guess = self.gbfs(word_pools, guess_history)

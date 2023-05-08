@@ -10,9 +10,9 @@ class EntropyAI(WordleAI):
         self.solved = [False for _ in range(4)]
 
     def guess(self, guess_history):
-        if(len(guess_history) == 0):
+        if len(guess_history) == 0:
             self.solved = [False for _ in range(4)]
-            return "rates" # Hard coded first guess to save computation time
+            return "rates"
         candidates = [self.words.copy() for _ in range(4)]
         for round in guess_history:
             for boardnum, board in enumerate(round):
