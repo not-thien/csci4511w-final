@@ -28,7 +28,10 @@ Run: "py .\Competition.py (number of games)"
 
 [Wordle Competition](https://github.com/Kinkelin/WordleCompetition)
 
-## Results (1000 Quordle Games)
+## Results
+
+- Inability to solve 4 words in 9 rounds results in a failure score of 15
+- 1000 Quordle Games
 
 # Leaderboard
 |Rank|      AI       |Success Rate|Starting Word|Avg # of Guesses|Best # of Guesses|         <-- Easiest Words          |Fewest Words Found| <-- Hardest Words (Caps not found) |Total Words Solved|Avg Words Solved|Time Per Round|   Author   |
