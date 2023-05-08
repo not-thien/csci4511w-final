@@ -172,7 +172,7 @@ def main():
     np.set_printoptions(threshold=np.inf)
     np.set_printoptions(suppress=True)
 
-    competition = Competition("ai_implementations", wordlist_filename="data/official/combined_wordlist.txt")
+    competition = Competition("ai_implementations_quordle", wordlist_filename="data/official/combined_wordlist.txt")
     competition.fight(rounds=int(sys.argv[1]), solution_wordlist_filename="data/official/shuffled_real_wordles.txt", print_details=True)
 
 if __name__ == "__main__":
