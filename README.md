@@ -31,7 +31,7 @@ Run: "py .\Competition.py (number of games)"
 ## Results (1000 Quordle Games)
 
 # Leaderboard
-|Rank|      AI       |Success Rate|Starting Word|Avg # of Guesses|Best # of Guesses|         <-- Easiest Words          |Fewest Words Found| <-- Hardest Words (Caps not found) |Total Boards Solved|Avg Boards Solved|Time Per Round|   Author   |
+|Rank|      AI       |Success Rate|Starting Word|Avg # of Guesses|Best # of Guesses|         <-- Easiest Words          |Fewest Words Found| <-- Hardest Words (Caps not found) |Total Words Solved|Avg Words Solved|Time Per Round|   Author   |
 |----|---------------|------------|-------------|----------------|-----------------|------------------------------------|------------------|------------------------------------|-------------------|-----------------|--------------|------------|
 |1   |EntropyAI      |93.0%       |rates        |8.679           |6                |['adept', 'snide', 'mound', 'swamp']|3                 |['abbey', 'place', 'FIZZY', 'rival']|3930               |3.930            |0.774seconds  |Jerome      |
 |2   |GreedyPopularAI|59.2%       |stond        |11.066          |6                |['solid', 'lease', 'blond', 'humid']|1                 |['woody', 'HATER', 'SOWER', 'HORNY']|3437               |3.437            |0.051seconds  |Thien Nguyen|
