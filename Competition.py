@@ -3,6 +3,7 @@ import os
 import random
 import importlib
 import time
+import sys
 
 import pytablewriter
 import numpy as np
@@ -37,7 +38,7 @@ class Competition:
 
     def play(self, competitor, words):
         guesses = []                             # will become a list of up to 9 words
-        successes = [False, False, False, False] # will be 4 Trues if Quordle completed
+        successes = np.array([False, False, False, False]) # will be 4 Trues if Quordle completed
         guess_history = []                       # will become a list of up to 9 lists of up to 4 3-tuples, each 3-tuple is (whichBoard, guess, guessResultForThatBoard)
                                                  #                                                                          (integer,    str,   list of 5 LetterInformation objects)
 
@@ -83,14 +84,24 @@ class Competition:
         points = {}
         times = {}
         round_words = []
+        minScore = {}
+        minSuccesses = {}
+        hardestWords = {}
+        easiestWords = {}
+        startingWord = ["rates","stond","aahed","random"]
 
-        for competitor in self.competitors:
+        for i, competitor in enumerate(self.competitors):
             result[competitor] = 0
             success_total[competitor] = 0
             partial_solves[competitor] = 0            
             guesses[competitor] = []
             points[competitor] = []
             times[competitor] = 0.0
+            minScore[competitor] = 15
+            minSuccesses[competitor] = 4
+            hardestWords[competitor] = ["" for x in range(4)]
+            easiestWords[competitor] = ["" for x in range(4)]
+
         fight_words = WordList(solution_wordlist_filename).get_list_copy()
         for r in range(rounds):
             words = []
@@ -100,17 +111,38 @@ class Competition:
             round_words.append(words)
             for c, competitor in enumerate(self.competitors):
                 print("\rRound", r + 1, "/", rounds, "word =", words, "competitior", c + 1, "/", len(self.competitors))
+
+                # Play and Time Game
                 competitor_start = time.time()
                 successes, round_guesses = self.play(competitor, words)
+                times[competitor] += time.time() - competitor_start
+
+                # Track round score
                 round_points = len(round_guesses) if all(successes) else 15
+
+                # Track best round score and words
+                if all(successes) and len(round_guesses) < minScore[competitor]:
+                    minScore[competitor] = len(round_guesses)
+                    easiestWords[competitor] = words
+
+                # Track worst successes and words
+                if not all(successes) and successes.sum() < minSuccesses[competitor]:
+                    minSuccesses[competitor] = successes.sum()
+                    hardestWords[competitor] = words.copy()
+                    for i, success in enumerate(successes):
+                        if not success:
+                            hardestWords[competitor][i] = hardestWords[competitor][i].upper()
+                
+                # Track partial wins
+                for solve in successes:
+                    if solve: partial_solves[competitor] += 1
+
+                # Track other stats
                 result[competitor] += round_points
                 guesses[competitor].append(round_guesses)
                 points[competitor].append(round_points)
-                for solve in successes: # track partial wins
-                    if solve: partial_solves[competitor] += 1
                 if all(successes):
                     success_total[competitor] += 1
-                times[competitor] += time.time() - competitor_start
 
         print("")
         if print_details:
@@ -124,14 +156,15 @@ class Competition:
 
         writer = pytablewriter.MarkdownTableWriter()
         writer.table_name = "Leaderboard"
-        writer.headers = ["Rank", "AI", "Points per round", "Success rate", "Individual Boards Solved", "Avg Boards Solved Per Round", "Time Per Round", "Author"]
+        writer.headers = ["Rank", "AI", "Success Rate", "Starting Word", "Avg # of Guesses", "Best # of Guesses", "<-- Easiest Words", "Fewest Words Found", "<-- Hardest Words (Caps not found)", "Total Boards Solved", "Avg Boards Solved", "Time Per Round", "Author"]
         for i in range(len(writer.headers)):
             writer.set_style(column=i, style=Style(align="left"))
         writer.value_matrix = []
 
         for i, competitor in enumerate(result):
             writer.value_matrix.append(
-                [i + 1, competitor.__class__.__name__, result[competitor] / rounds, str(100 * success_total[competitor] / rounds) + "%", 
+                [i + 1, competitor.__class__.__name__, str(100 * success_total[competitor] / rounds) + "%", startingWord[i], 
+                 result[competitor] / rounds, minScore[competitor], easiestWords[competitor], minSuccesses[competitor], hardestWords[competitor], 
                  str(partial_solves[competitor]), str(partial_solves[competitor] / rounds), "{:.3f}".format(times[competitor] / rounds) + "seconds", competitor.get_author()])
         writer.write_table()
 
@@ -140,7 +173,7 @@ def main():
     np.set_printoptions(suppress=True)
 
     competition = Competition("ai_implementations", wordlist_filename="data/official/combined_wordlist.txt")
-    competition.fight(rounds=100, solution_wordlist_filename="data/official/shuffled_real_wordles.txt", print_details=True)
+    competition.fight(rounds=int(sys.argv[1]), solution_wordlist_filename="data/official/shuffled_real_wordles.txt", print_details=True)
 
 if __name__ == "__main__":
     main()

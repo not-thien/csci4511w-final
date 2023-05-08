@@ -18,21 +18,17 @@ class EntropyAI(WordleAI):
             for boardnum, board in enumerate(round):
                 guess = board[1]
                 outcome = board[2]
-                countWin = 0
                 for i, x in enumerate(outcome):
                     if x == LetterInformation.CORRECT:
-                        countWin += 1
                         candidates[boardnum] = [x for x in candidates[boardnum] if x[i] == guess[i]]
                     elif x == LetterInformation.PRESENT:
                         candidates[boardnum] = [x for x in candidates[boardnum] if x[i] != guess[i] and guess[i] in x]
                     else:
                         candidates[boardnum] = [x for x in candidates[boardnum] if guess[i] not in x]
-                if countWin == 5:
-                    self.solved[boardnum] = True
         return self.get_candidate(candidates, self.words)
 
     def get_author(self):
-        return "Vwang"
+        return "Jerome"
 
     """
     This function provides three probability values:
@@ -88,15 +84,21 @@ class EntropyAI(WordleAI):
         return entropy
 
     def get_candidate(self, words, all_words):
-        m = 0
         # Set default case
         for i,x in enumerate(self.solved):
             if not x:
                 best = words[i][0]
 
+        # Check for solved boards
+        for i, boardWords in enumerate(words):
+            if len(boardWords) == 1 and not self.solved[i]:
+                self.solved[i] = True
+                return boardWords[0]
+
         p = []
         q = []
         r = []
+        # Set probability distributions
         for i,solved in enumerate(self.solved):
             if not solved:
                 tempP, tempQ, tempR = self.get_probability_distributions(words[i])
@@ -108,18 +110,14 @@ class EntropyAI(WordleAI):
                 q.append([])
                 r.append([])
 
-        # Once the number of words become small enough, restrict search to that. FIX???
-        for i, boardWords in enumerate(words):
-            if len(boardWords) == 1 and not self.solved[i]:
-                self.solved[i] = True
-                return boardWords[0]
-
+        # Find best word
+        maxScore = 0
         for word in all_words:
-            s = 0
+            score = 0
             for i,solved in enumerate(self.solved):
                 if not solved:
-                    s += self.get_score(word, p[i], q[i], r[i]) + self.judge.is_wordle_probability(word)
-            if s > m:
-                m = s
+                    score += self.get_score(word, p[i], q[i], r[i]) + self.judge.is_wordle_probability(word)
+            if score > maxScore:
+                maxScore = score
                 best = word
         return best
