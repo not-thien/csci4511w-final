@@ -22,7 +22,7 @@ class DfsAI(WordleAI):
     def guess(self, guess_history):
         if(len(guess_history) == 0):
             self.solved = [False for _ in range(4)]
-            return 'aahed'  # aahed is the first
+            return 'aahed'
         word_pools = [pool.copy() for pool in self.corpus]
         word_pools = self.filter_pools(word_pools, guess_history)
         next_guess = self.dfs(word_pools, guess_history)
