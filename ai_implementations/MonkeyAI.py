@@ -9,4 +9,4 @@ class MonkeyAI(WordleAI):
         return random.choice(self.words)
 
     def get_author(self):
-        return "example"
+        return "Example"

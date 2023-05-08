@@ -74,14 +74,14 @@ class Competition:
                 break
         return successes, guesses
 
-    def fight(self, rounds, print_details=False, solution_wordlist_filename='data/official/combined_wordlist.txt',
-              shuffle=False):
+    def fight(self, rounds, print_details=False, solution_wordlist_filename='data/official/combined_wordlist.txt'):
         print("Start tournament")
         result = {}
         success_total = {}
         partial_solves = {}
         guesses = {}
         points = {}
+        times = {}
         round_words = []
 
         for competitor in self.competitors:
@@ -90,20 +90,16 @@ class Competition:
             partial_solves[competitor] = 0            
             guesses[competitor] = []
             points[competitor] = []
+            times[competitor] = 0.0
         fight_words = WordList(solution_wordlist_filename).get_list_copy()
-        start = time.time()
-        competitor_times = np.zeros(len(self.competitors))
         for r in range(rounds):
             words = []
             for i in range(4):
             # setup the quordle words the bots are trying to guess
                 words.append(random.choice(fight_words))
-            current_time = time.time() - start
             round_words.append(words)
-            c = 0
-            for competitor in self.competitors:
-                print("\rRound", r + 1, "/", rounds, "word =", words, "competitior", c + 1, "/", len(self.competitors),
-                      "time", current_time, "/", current_time * rounds / (r + 1), end='')
+            for c, competitor in enumerate(self.competitors):
+                print("\rRound", r + 1, "/", rounds, "word =", words, "competitior", c + 1, "/", len(self.competitors))
                 competitor_start = time.time()
                 successes, round_guesses = self.play(competitor, words)
                 round_points = len(round_guesses) if all(successes) else 15
@@ -114,12 +110,7 @@ class Competition:
                     if solve: partial_solves[competitor] += 1
                 if all(successes):
                     success_total[competitor] += 1
-                competitor_times[c] += time.time() - competitor_start
-                c += 1
-
-        print("\n")
-        for i in range(len(competitor_times)):
-            print(self.competitors[i].__class__.__name__, "calculation took", "{:.3f}".format(competitor_times[i]), "seconds")
+                times[competitor] += time.time() - competitor_start
 
         print("")
         if print_details:
@@ -133,17 +124,15 @@ class Competition:
 
         writer = pytablewriter.MarkdownTableWriter()
         writer.table_name = "Leaderboard"
-        writer.headers = ["Nr", "AI", "Author", "Points per round", "Success rate", "Individual Boards Solved", "Avg Boards Solved Per Round"]
+        writer.headers = ["Rank", "AI", "Points per round", "Success rate", "Individual Boards Solved", "Avg Boards Solved Per Round", "Time Per Round", "Author"]
         for i in range(len(writer.headers)):
             writer.set_style(column=i, style=Style(align="left"))
         writer.value_matrix = []
 
-        placement = 1
-        for competitor in result:
+        for i, competitor in enumerate(result):
             writer.value_matrix.append(
-                [placement, competitor.__class__.__name__, competitor.get_author(), result[competitor] / rounds,
-                 str(100 * success_total[competitor] / rounds) + "%", str(partial_solves[competitor]), str(partial_solves[competitor] / rounds)])
-            placement += 1
+                [i + 1, competitor.__class__.__name__, result[competitor] / rounds, str(100 * success_total[competitor] / rounds) + "%", 
+                 str(partial_solves[competitor]), str(partial_solves[competitor] / rounds), "{:.3f}".format(times[competitor] / rounds) + "seconds", competitor.get_author()])
         writer.write_table()
 
 def main():
@@ -151,8 +140,7 @@ def main():
     np.set_printoptions(suppress=True)
 
     competition = Competition("ai_implementations", wordlist_filename="data/official/combined_wordlist.txt")
-    # competition.fight(rounds=1000, solution_wordlist_filename="data/official/shuffled_real_wordles.txt", print_details=False)
-    competition.fight(rounds=30, solution_wordlist_filename="data/official/shuffled_real_wordles.txt", print_details=True)
+    competition.fight(rounds=100, solution_wordlist_filename="data/official/shuffled_real_wordles.txt", print_details=True)
 
 if __name__ == "__main__":
     main()
