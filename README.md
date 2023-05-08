@@ -10,29 +10,30 @@
 
 ## Goal:
 
-Create a Quordle AI bot using different model search methodology taught in class, in addition with incorporation of information entropy techniques. Then we test and compare the performance of the Quordle bots, using metrics of computation speed, success rates, and number of guesses used.
+Create AI bots to solve Quordle games using different search methodologies and information entropy techniques. Test and compare the performance of the Quordle bots using metrics including computation speed, success rate, and average number of guesses per game.
 
-## Setup:
+## Libraries and Dependancies:
 
-big poggers!
+1. Python 3
+2. Pip (and following libraries)
+  - numpy
+  - trienode
+  - pytablewriter
 
-## Libraries and Open Source Software Used
+## Setup
 
-1. [Wordle Competition](https://github.com/Kinkelin/WordleCompetition)
-2. Python numpy
-3. Ur mom
+Run: "py .\Competition.py (number of games)"
 
-## Experiment
+## Based from the following Wordle Competition
 
-Using the same word bank that Wordle has, we ran each of our bots through a modified version of the Wordle competition. The competition was modified to play numerous quordle games
+[Wordle Competition](https://github.com/Kinkelin/WordleCompetition)
 
 ## Results
 
-| Nr  | AI                 | Avg. Computing Speed | Points per round | Success rate |
-| --- | ------------------ | -------------------- | ---------------- | ------------ |
-| 1   | OutcomeBasedAI     | 10s                  | 3.816            | 100.0%       |
-| 2   | EntropyAI          | 5s                   | 4.091            | 100.0%       |
-| 3   | RubzipAI           | 5s                   | 4.569            | 97.2%        |
-| 4   | LetterPopularityAI | 5s                   | 4.653            | 93.6%        |
-| 5   | BruugleAI          | 5s                   | 6.120            | 97.0%        |
-| 6   | MonkeyAI           | 5s                   | 10.000           | 0.0%         |
+# Leaderboard
+|Rank|      AI       |Success Rate|Starting Word|Avg # of Guesses|Best # of Guesses|         <-- Easiest Words          |Fewest Words Found| <-- Hardest Words (Caps not found) |Total Boards Solved|Avg Boards Solved|Time Per Round|   Author   |
+|----|---------------|------------|-------------|----------------|-----------------|------------------------------------|------------------|------------------------------------|-------------------|-----------------|--------------|------------|
+|1   |EntropyAI      |93.0%       |rates        |8.679           |6                |['adept', 'snide', 'mound', 'swamp']|3                 |['abbey', 'place', 'FIZZY', 'rival']|3930               |3.930            |0.774seconds  |Jerome      |
+|2   |GreedyPopularAI|59.2%       |stond        |11.066          |6                |['solid', 'lease', 'blond', 'humid']|1                 |['woody', 'HATER', 'SOWER', 'HORNY']|3437               |3.437            |0.051seconds  |Thien Nguyen|
+|3   |DfsAI          |36.5%       |aahed        |12.666          |6                |['cloud', 'bused', 'gruel', 'mucus']|0                 |['LAYER', 'TRUST', 'GEEKY', 'JAZZY']|2994               |2.994            |0.063seconds  |Jerome      |
+|4   |RandomAI       |0.0%        |random       |15.000          |15               |['', '', '', '']                    |0                 |['SIEVE', 'PESKY', 'WRUNG', 'JIFFY']|7                  |0.007            |0.004seconds  |Example     |
