@@ -30,8 +30,7 @@ Run: "py .\Competition.py (number of games)"
 
 ## Results
 
-- Inability to solve 4 words in 9 rounds results in a failure score of 15
-- 1000 Quordle Games
+- Out of 1000 Quordle Games, EntropyAI had the highest success rate, but slowest computation time. However, it is fast enough for individual play
 
 # Leaderboard
 |Rank|      AI       |Success Rate|Starting Word|Avg # of Guesses|Best # of Guesses|         <-- Easiest Words          |Fewest Words Found| <-- Hardest Words (Caps not found) |Total Words Solved|Avg Words Solved|Time Per Round|   Author   |
