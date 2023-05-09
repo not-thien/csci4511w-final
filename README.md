@@ -1,6 +1,6 @@
 # CSCI4511W Spring 2023 Final Project
 
-[Link to our final writeup on Overleaf!](https://blogs.motiondevelopment.top/overleaf)
+[Link to our final writeup on Overleaf!](https://www.overleaf.com/read/ntsmqtvqynrm)
 
 ## Contributors
 
