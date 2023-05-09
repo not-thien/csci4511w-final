@@ -88,7 +88,7 @@ class Competition:
         minSuccesses = {}
         hardestWords = {}
         easiestWords = {}
-        startingWord = ["rates","stond","aahed","random"]
+        startingWords = {}
 
         for i, competitor in enumerate(self.competitors):
             result[competitor] = 0
@@ -101,6 +101,7 @@ class Competition:
             minSuccesses[competitor] = 4
             hardestWords[competitor] = ["" for x in range(4)]
             easiestWords[competitor] = ["" for x in range(4)]
+            startingWords[competitor] = ["" for x in range(4)]
 
         fight_words = WordList(solution_wordlist_filename).get_list_copy()
         for r in range(rounds):
@@ -111,11 +112,14 @@ class Competition:
             round_words.append(words)
             for c, competitor in enumerate(self.competitors):
                 print("\rRound", r + 1, "/", rounds, "word =", words, "competitior", c + 1, "/", len(self.competitors))
-
                 # Play and Time Game
                 competitor_start = time.time()
                 successes, round_guesses = self.play(competitor, words)
                 times[competitor] += time.time() - competitor_start
+
+                # Track starting words
+                if r == 0:
+                    startingWords[competitor] = round_guesses[0]
 
                 # Track round score
                 round_points = len(round_guesses) if all(successes) else 15
@@ -162,8 +166,10 @@ class Competition:
         writer.value_matrix = []
 
         for i, competitor in enumerate(result):
+            if i == 3:
+                startingWords[competitor] = "random"
             writer.value_matrix.append(
-                [i + 1, competitor.__class__.__name__, str(100 * success_total[competitor] / rounds) + "%", startingWord[i], 
+                [i + 1, competitor.__class__.__name__, str(100 * success_total[competitor] / rounds) + "%", startingWords[competitor], 
                  result[competitor] / rounds, minScore[competitor], easiestWords[competitor], minSuccesses[competitor], hardestWords[competitor], 
                  str(partial_solves[competitor]), str(partial_solves[competitor] / rounds), "{:.3f}".format(times[competitor] / rounds) + "seconds", competitor.get_author()])
         writer.write_table()

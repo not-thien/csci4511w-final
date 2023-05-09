@@ -20,9 +20,9 @@ class DfsAI(WordleAI):
         self.solved = [False for _ in range(4)]
     
     def guess(self, guess_history):
-        if(len(guess_history) == 0):
+        if len(guess_history) == 0:
             self.solved = [False for _ in range(4)]
-            return 'aahed'
+            return "aahed"
         word_pools = [pool.copy() for pool in self.corpus]
         word_pools = self.filter_pools(word_pools, guess_history)
         next_guess = self.dfs(word_pools, guess_history)
@@ -47,7 +47,7 @@ class DfsAI(WordleAI):
                     return word_pool[0]
                 else:
                     self.solved[i] = True
-        return "abort"
+        return "abort" # failure case
     
     def get_author(self):
         return "Jerome"
